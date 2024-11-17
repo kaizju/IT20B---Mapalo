@@ -10,7 +10,7 @@ import java.util.List;
 
 class Transaction {
     private String description;
-    private double amount;
+    private double amounsss;
     private String date; // Simplified as a String for this example
 
     public Transaction(String description, double amount, String date) {
