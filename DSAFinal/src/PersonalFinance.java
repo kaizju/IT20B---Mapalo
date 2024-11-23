@@ -53,22 +53,19 @@ public class PersonalFinance extends javax.swing.JFrame {
                 current.next = newTransaction;
             }
         }
-
         public void displayTransactions() {
-            model.setRowCount(0); // Clear the table before adding new data
+            model.setRowCount(0);
             Transaction current = head;
             while (current != null) {
                 model.addRow(new Object[]{current.theDate, current.txt, current.wow, current.amo});
                 current = current.next;
             }
         }
-
         public void sortTransactions(boolean byAmount) {
             if (head == null || head.next == null) {
                 JOptionPane.showMessageDialog(null, "No transactions to sort.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
             boolean swapped;
             do {
                 swapped = false;
@@ -77,9 +74,7 @@ public class PersonalFinance extends javax.swing.JFrame {
                     boolean condition = byAmount
                             ? current.amo > current.next.amo
                             : current.theDate.compareTo(current.next.theDate) > 0;
-
                     if (condition) {
-
                         String tempType = current.wow;
                         double tempAmount = current.amo;
                         String tempDate = current.theDate;
@@ -150,6 +145,8 @@ public class PersonalFinance extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Personal Finance Management");
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
@@ -191,6 +188,7 @@ public class PersonalFinance extends javax.swing.JFrame {
         });
         jPanel2.add(bal, new org.netbeans.lib.awtextra.AbsoluteConstraints(667, 319, 140, 30));
 
+        list.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         list.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -266,7 +264,7 @@ public class PersonalFinance extends javax.swing.JFrame {
         jLabel5.setText("PERSONAL FINANCE MANAGEMENT");
         jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 360, 380, 30));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 830, 420));
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 830, 400));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -300,8 +298,7 @@ public class PersonalFinance extends javax.swing.JFrame {
         undoStack.push(transaction);
         transactions.addTransaction(wow, amount, theDate, txt);
 
-        // Add the transaction to the linked list
-// Confirmation message
+  
         JOptionPane.showMessageDialog(null, "Transaction added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
 
 
@@ -338,17 +335,17 @@ public class PersonalFinance extends javax.swing.JFrame {
     }//GEN-LAST:event_undoActionPerformed
 
     private void totalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_totalActionPerformed
-        double totalBalance = 0.0; // Initialize total balance
-        Transaction current = transactions.head; // Start from the head of the linked list
+        double totalBalance = 0.0;
+        Transaction current = transactions.head; 
 
-        // Traverse through the transaction list
+       
         while (current != null) {
             if ("Income".equalsIgnoreCase(current.wow)) {
-                totalBalance += current.amo; // Add income to the balance
+                totalBalance += current.amo; 
             } else if ("Expense".equalsIgnoreCase(current.wow)) {
-                totalBalance -= current.amo; // Subtract expense from the balance
+                totalBalance -= current.amo; 
             }
-            current = current.next; // Move to the next transaction
+            current = current.next;
         }
         bal.setText("Balance: P" + totalBalance);
 
