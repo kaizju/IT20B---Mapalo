@@ -1,21 +1,135 @@
 
-import java.util.LinkedList;
+import java.text.SimpleDateFormat;
 import java.util.Stack;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+
 public class PersonalFinance extends javax.swing.JFrame {
 
     /**
      * Creates new form PersonalFinance
      */
     public PersonalFinance() {
-        transactions = new LinkedList<>();
-        undoStack = new Stack<>();
         initComponents();
     }
-  private double balance;
-  private LinkedList<Transaction> transactions;
-    private Stack<Transaction> undoStack;
+
+    private DefaultTableModel model;
+    private TransactionList transactions = new TransactionList();
+    private Stack<Transaction> undoStack = new Stack<>();
+    SimpleDateFormat dateFormat;
+
+    class Transaction {
+
+        String wow;
+        String txt;
+        double amo;
+        String theDate;
+        Transaction next;
+
+        public Transaction(String date, String description, String type, double amount) {
+            this.wow = type;
+            this.amo = amount;
+            this.theDate = date;
+            this.txt = description;
+            this.next = null;
+        }
+
+        @Override
+        public String toString() {
+            return wow + " | Amount: " + amo + " | Date: " + txt + " | Description: ";
+        }
+    }
+
+    class TransactionList {
+
+        private Transaction head;
+
+        public void addTransaction(String type, double amount, String date, String description) {
+            Transaction newTransaction = new Transaction(date, description, type, amount);
+            if (head == null) {
+                head = newTransaction;
+            } else {
+                Transaction current = head;
+                while (current.next != null) {
+                    current = current.next;
+                }
+                current.next = newTransaction;
+            }
+        }
+
+        public void displayTransactions() {
+            model.setRowCount(0); // Clear the table before adding new data
+            Transaction current = head;
+            while (current != null) {
+                model.addRow(new Object[]{current.theDate, current.txt, current.wow, current.amo});
+                current = current.next;
+            }
+        }
+
+        public void sortTransactions(boolean byAmount) {
+            if (head == null || head.next == null) {
+                JOptionPane.showMessageDialog(null, "No transactions to sort.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            boolean swapped;
+            do {
+                swapped = false;
+                Transaction current = head;
+                while (current.next != null) {
+                    boolean condition = byAmount
+                            ? current.amo > current.next.amo
+                            : current.theDate.compareTo(current.next.theDate) > 0;
+
+                    if (condition) {
+
+                        String tempType = current.wow;
+                        double tempAmount = current.amo;
+                        String tempDate = current.theDate;
+                        String tempDescription = current.txt;
+
+                        current.wow = current.next.wow;
+                        current.amo = current.next.amo;
+                        current.theDate = current.next.theDate;
+                        current.txt = current.next.txt;
+
+                        current.next.wow = tempType;
+                        current.next.amo = tempAmount;
+                        current.next.theDate = tempDate;
+                        current.next.txt = tempDescription;
+
+                        swapped = true;
+                    }
+                    current = current.next;
+                }
+            } while (swapped);
+
+            JOptionPane.showMessageDialog(null, "Transactions sorted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        public Transaction removeLastTransaction() {
+            if (head == null) {
+                return null;
+            }
+            if (head.next == null) {
+                Transaction temp = head;
+                head = null;
+                return temp;
+            }
+            Transaction current = head;
+            while (current.next.next != null) {
+                current = current.next;
+            }
+            Transaction temp = current.next;
+            current.next = null;
+            return temp;
+        }
+
+        private void add(TransactionList transaction) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+    };
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -27,28 +141,29 @@ public class PersonalFinance extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        date = new com.toedter.calendar.JDateChooser();
+        d = new com.toedter.calendar.JDateChooser();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         money = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         type = new javax.swing.JComboBox();
         jButton1 = new javax.swing.JButton();
-        jTextField2 = new javax.swing.JTextField();
+        bal = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         list = new javax.swing.JTable();
         jLabel4 = new javax.swing.JLabel();
         script = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        sorta = new javax.swing.JButton();
+        sortd = new javax.swing.JButton();
+        undo = new javax.swing.JButton();
+        total = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        jPanel2.add(date, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 9, 100, -1));
+        jPanel2.add(d, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 9, 100, -1));
 
         jLabel1.setText("Amount:");
         jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 9, -1, -1));
@@ -77,13 +192,13 @@ public class PersonalFinance extends javax.swing.JFrame {
         });
         jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(718, 9, -1, -1));
 
-        jTextField2.setText("Balance:");
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+        bal.setText("Balance:");
+        bal.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
+                balActionPerformed(evt);
             }
         });
-        jPanel2.add(jTextField2, new org.netbeans.lib.awtextra.AbsoluteConstraints(667, 310, 140, 30));
+        jPanel2.add(bal, new org.netbeans.lib.awtextra.AbsoluteConstraints(667, 310, 140, 30));
 
         list.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -93,16 +208,9 @@ public class PersonalFinance extends javax.swing.JFrame {
                 "Date", "Description", "Type", "Amount"
             }
         ) {
-            Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.String.class, java.lang.Object.class, java.lang.Integer.class
-            };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false
             };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
@@ -131,24 +239,37 @@ public class PersonalFinance extends javax.swing.JFrame {
         jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 9, -1, -1));
         jPanel2.add(script, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 9, 160, -1));
 
-        jButton2.setText("Sort by Amount");
-        jPanel2.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 310, -1, -1));
-
-        jButton3.setText("Sort by Date");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        sorta.setText("Sort by Amount");
+        sorta.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                sortaActionPerformed(evt);
             }
         });
-        jPanel2.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 310, -1, -1));
+        jPanel2.add(sorta, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 310, -1, -1));
 
-        jButton4.setText("Undo");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
+        sortd.setText("Sort by Date");
+        sortd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
+                sortdActionPerformed(evt);
             }
         });
-        jPanel2.add(jButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 310, -1, -1));
+        jPanel2.add(sortd, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 310, -1, -1));
+
+        undo.setText("Undo");
+        undo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                undoActionPerformed(evt);
+            }
+        });
+        jPanel2.add(undo, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 310, -1, -1));
+
+        total.setText("Total Balance");
+        total.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                totalActionPerformed(evt);
+            }
+        });
+        jPanel2.add(total, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 310, -1, -1));
 
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 820, 410));
 
@@ -156,20 +277,45 @@ public class PersonalFinance extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-    if(list.equals("")||date.equals("")||money.equals("")){
-    JOptionPane.showMessageDialog(null, "You must fill out all!!!");
-    }else{
-         transactions.add(list.addRow());
-        undoStack.push(list);
-        DefaultTableModel model = (DefaultTableModel)list.getModel();
-        model.addRow(new Object[]{date.getDate(),money.getText(),type.getSelectedItem(),money.getText()});
-    }
-        
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String theDate;
+        try {
+            theDate = dateFormat.format(d.getDate());
+        } catch (NullPointerException e) {
+            JOptionPane.showMessageDialog(null, "Please select a valid date.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String txt = script.getText().trim();
+        String wow = (String) type.getSelectedItem();
+        String amo = money.getText().trim();
+
+        double amount;
+        try {
+            amount = Double.parseDouble(amo);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Invalid amount entered.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        model = (DefaultTableModel) list.getModel();
+        model.addRow(new Object[]{theDate, txt, wow, amount});
+
+        Transaction transaction = new Transaction(theDate, txt, wow, amount);
+        undoStack.push(transaction);
+        transactions.addTransaction(wow, amount, theDate, txt);
+
+        // Add the transaction to the linked list
+// Confirmation message
+        JOptionPane.showMessageDialog(null, "Transaction added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+
+    private void balActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_balActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField2ActionPerformed
+    }//GEN-LAST:event_balActionPerformed
 
     private void listAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_listAncestorAdded
         // TODO add your handling code here:
@@ -179,20 +325,45 @@ public class PersonalFinance extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_moneyActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-       for (int i = 0; i < transactions.size() - 1; i++) {
-            for (int j = 0; j < transactions.size() - i - 1; j++) {
-                if (transactions.get(j).getDate().after(transactions.get(j + 1).getDate())) {
-                    Collections.swap(transactions, j, j + 1);
-                }
-            }
-        }
-        list.update(null); 
-    }//GEN-LAST:event_jButton3ActionPerformed
+    private void sortdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortdActionPerformed
+        transactions.sortTransactions(false);
+        transactions.displayTransactions();
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-     
-    }//GEN-LAST:event_jButton4ActionPerformed
+    }//GEN-LAST:event_sortdActionPerformed
+
+    private void undoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_undoActionPerformed
+        if (undoStack.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No transactions to undo.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        Transaction removed = undoStack.pop();
+        transactions.removeLastTransaction();
+        transactions.displayTransactions();
+        JOptionPane.showMessageDialog(null, "Last transaction undone.", "Success", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_undoActionPerformed
+
+    private void totalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_totalActionPerformed
+        double totalBalance = 0.0; // Initialize total balance
+        Transaction current = transactions.head; // Start from the head of the linked list
+
+        // Traverse through the transaction list
+        while (current != null) {
+            if ("Income".equalsIgnoreCase(current.wow)) {
+                totalBalance += current.amo; // Add income to the balance
+            } else if ("Expense".equalsIgnoreCase(current.wow)) {
+                totalBalance -= current.amo; // Subtract expense from the balance
+            }
+            current = current.next; // Move to the next transaction
+        }
+        bal.setText("Balance: $" + totalBalance);
+
+    }//GEN-LAST:event_totalActionPerformed
+
+    private void sortaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortaActionPerformed
+        transactions.sortTransactions(true);
+        transactions.displayTransactions();
+
+    }//GEN-LAST:event_sortaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -230,11 +401,9 @@ public class PersonalFinance extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private com.toedter.calendar.JDateChooser date;
+    private javax.swing.JTextField bal;
+    private com.toedter.calendar.JDateChooser d;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -242,10 +411,14 @@ public class PersonalFinance extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField2;
     private javax.swing.JTable list;
     private javax.swing.JTextField money;
     private javax.swing.JTextField script;
+    private javax.swing.JButton sorta;
+    private javax.swing.JButton sortd;
+    private javax.swing.JButton total;
     private javax.swing.JComboBox type;
+    private javax.swing.JButton undo;
     // End of variables declaration//GEN-END:variables
+
 }
