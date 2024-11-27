@@ -118,7 +118,29 @@ public class PersonalFinance extends javax.swing.JFrame {
         }
 
     }
+private void displayTransactionHistory() {
+    StringBuilder history = new StringBuilder();
+    Transaction current = transactions.head;
+    
+   
+    if (current == null) {
+        JOptionPane.showMessageDialog(null, "No transactions available.", "Transaction History", JOptionPane.INFORMATION_MESSAGE);
+        return;
+    }
 
+   
+    while (current != null) {
+        history.append("Date: ").append(current.theDate)
+               .append(" | Description: ").append(current.txt)
+               .append(" | Type: ").append(current.wow)
+               .append(" | Amount: ").append(current.amo)
+               .append("\n");
+        current = current.next;
+    }
+
+    
+    JOptionPane.showMessageDialog(null, history.toString(), "Transaction History", JOptionPane.INFORMATION_MESSAGE);
+}
    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -126,7 +148,6 @@ public class PersonalFinance extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        d = new com.toedter.calendar.JDateChooser();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         money = new javax.swing.JTextField();
@@ -143,6 +164,8 @@ public class PersonalFinance extends javax.swing.JFrame {
         undo = new javax.swing.JButton();
         total = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
+        d = new com.toedter.calendar.JDateChooser();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Personal Finance Management");
@@ -151,10 +174,9 @@ public class PersonalFinance extends javax.swing.JFrame {
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        jPanel2.add(d, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 10, 100, -1));
 
         jLabel1.setText("Amount:");
-        jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 14, -1, -1));
+        jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 13, -1, -1));
 
         jLabel2.setText("Date:");
         jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 14, -1, -1));
@@ -164,13 +186,13 @@ public class PersonalFinance extends javax.swing.JFrame {
                 moneyActionPerformed(evt);
             }
         });
-        jPanel2.add(money, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 10, 120, -1));
+        jPanel2.add(money, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 10, 120, -1));
 
         jLabel3.setText("Description:");
-        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 14, -1, -1));
+        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 13, -1, -1));
 
         type.setModel(new javax.swing.DefaultComboBoxModel(new String[] { " ", "Expense", "Income" }));
-        jPanel2.add(type, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 10, 110, -1));
+        jPanel2.add(type, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 10, 110, -1));
 
         jButton1.setText("Add");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -178,7 +200,7 @@ public class PersonalFinance extends javax.swing.JFrame {
                 jButton1ActionPerformed(evt);
             }
         });
-        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(760, 10, -1, -1));
+        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(780, 10, -1, -1));
 
         bal.setText("Balance:");
         bal.addActionListener(new java.awt.event.ActionListener() {
@@ -225,8 +247,8 @@ public class PersonalFinance extends javax.swing.JFrame {
         jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 50, 807, 254));
 
         jLabel4.setText("Type:");
-        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 14, -1, -1));
-        jPanel2.add(script, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 10, 160, -1));
+        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 13, -1, -1));
+        jPanel2.add(script, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 10, 160, -1));
 
         sorta.setText("Sort by Amount");
         sorta.addActionListener(new java.awt.event.ActionListener() {
@@ -258,13 +280,22 @@ public class PersonalFinance extends javax.swing.JFrame {
                 totalActionPerformed(evt);
             }
         });
-        jPanel2.add(total, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 320, -1, -1));
+        jPanel2.add(total, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 320, -1, -1));
 
         jLabel5.setFont(new java.awt.Font("Sitka Small", 1, 18)); // NOI18N
         jLabel5.setText("PERSONAL FINANCE MANAGEMENT");
         jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 360, 380, 30));
+        jPanel2.add(d, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 10, -1, -1));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 830, 400));
+        jButton2.setText("View History");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        jPanel2.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 320, -1, -1));
+
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 900, 420));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -357,6 +388,10 @@ public class PersonalFinance extends javax.swing.JFrame {
 
     }//GEN-LAST:event_sortaActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        displayTransactionHistory();
+    }//GEN-LAST:event_jButton2ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -396,6 +431,7 @@ public class PersonalFinance extends javax.swing.JFrame {
     private javax.swing.JTextField bal;
     private com.toedter.calendar.JDateChooser d;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
